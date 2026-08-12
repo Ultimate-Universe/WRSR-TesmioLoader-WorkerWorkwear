@@ -1,0 +1,5 @@
+LIBRARY worker_workwear
+EXPORTS
+    TsmPluginApiVersion
+    TsmPluginInit
+    TsmPluginStart

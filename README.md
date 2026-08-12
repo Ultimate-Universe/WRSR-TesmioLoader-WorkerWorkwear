@@ -1,69 +1,92 @@
 # Worker Workwear
 
-**Version 1.0.0**
+**Version 1.1.0**
 
-Worker Workwear is a TesmioLoader plugin for **Workers & Resources: Soviet Republic** that changes the game's dedicated manual-work worker appearance pool so the male worker variants use the two overall-clad materials instead of the shirt-and-trouser variants.
+Worker Workwear is a TesmioLoader plugin for **Workers & Resources: Soviet Republic** that restricts the game's dedicated manual-work male worker appearance pool to the two overall-clad material variants.
 
-The change is visual only. It does not alter worker productivity, jobs, movement, pathfinding, animations, construction mechanics, or citizen clothing outside the dedicated manual-work renderer.
+The change is visual only. It does not alter productivity, workplaces, jobs, movement, pathfinding, animations, construction mechanics, citizen inventories, or ordinary citizen clothing.
 
 ## What it changes
 
-The manual-work renderer normally loads four male materials:
+The manual-work renderer loads four male materials:
 
 - `workers2/working2/muz1.mtl`
 - `workers2/working2/muz2.mtl`
 - `workers2/working2/muz3.mtl`
 - `workers2/working2/muz4.mtl`
 
-Worker Workwear redirects the two non-overall variants:
+Worker Workwear redirects the two shirt-and-trouser variants:
 
-- `muz3` → `muz1`
-- `muz4` → `muz2`
+- `muz3` to `muz1`
+- `muz4` to `muz2`
 
-This leaves the native renderer, worker meshes, animations, positions, and selection logic intact while restricting the visible workwear to the two overall variants.
+The native meshes, animations, positions, and selection logic remain unchanged.
 
 ## Requirements
 
-- Workers & Resources: Soviet Republic on 64-bit Windows
-- TesmioLoader API 3
+- Workers & Resources: Soviet Republic v1.1.1.9
+- 64-bit Windows
+- TesmioLoader b0.3.5 / API 4
 - The game must be launched through TesmioLoader
 
-Version 1.0.0 was built and tested against **Workers & Resources: Soviet Republic v1.1.1.7**.
+No DLC is required. The plugin uses the game's existing base worker materials and does not add external assets.
 
 ## Installation
 
-Copy:
-
-```text
-worker_workwear.dll
-```
-
-into:
+Copy `Mod Files/plugins/worker_workwear.dll` into:
 
 ```text
 Steam\steamapps\common\SovietRepublic\tesmioloader\build\plugins
 ```
 
-Then launch the game through TesmioLoader and enable `worker_workwear.dll` if required by your TesmioLoader configuration.
+Ensure the plugin is enabled in `tesmioloader.ini`:
 
-Steam Workshop subscriptions place plugin files in the Workshop content directory; TesmioLoader plugins must still be copied into its `build\plugins` directory.
+```ini
+[plugins]
+worker_workwear=1
+```
+
+Then launch WRSR through `tesmiolauncher.exe`.
+
+Steam Workshop cannot directly replace files inside the TesmioLoader installation. After a Workshop update, copy the current DLL from the subscribed Workshop item into `tesmioloader\build\plugins` again.
+
+## Configuration
+
+Worker Workwear has no gameplay settings or hotkeys. It is enabled or disabled through the TesmioLoader plugin list.
+
+## Compatibility
+
+Version 1.1.0 was validated in-game with WRSR v1.1.1.9 and the supplied TesmioLauncher b0.3.5/API 4.
+
+The plugin patches the current `C3D_MATERIAL::Load` import through TesmioLoader and preserves the function already present in the import slot. This permits normal hook chaining with other plugins that use the same import-patching mechanism.
+
+The hook is intentionally narrow: only paths ending in the two dedicated manual-worker material names are redirected. Unrelated material loads pass through unchanged.
+
+## Troubleshooting
+
+The TesmioLoader log should report:
+
+```text
+workwear  init v1.1.0 - WRSR 1.1.1.9 / API 4
+workwear  installed v1.1.0 - muz3/muz4 redirected to muz1/muz2
+```
+
+The first use of each affected material also records a one-time redirect message. If the log contains `workwear  FAILED`, confirm that the game version and TesmioLoader version meet the requirements and include `tesmioloader.log` when reporting the problem.
 
 ## Building from source
 
-The repository includes the source and the TesmioLoader API header used to build the plugin.
+The complete reproducible plugin source is in `source`.
 
 Requirements:
 
 - LLVM `clang-cl`
+- LLVM `clang`
 - LLVM `lld-link`
+- Python 3
 
-From the `source` directory, run:
+Run `source/build_freestanding.cmd` from a Windows LLVM command environment. It produces `source/worker_workwear.dll` and removes intermediate object files.
 
-```text
-build_freestanding.cmd
-```
-
-The resulting `worker_workwear.dll` is a freestanding x64 DLL with no normal C runtime dependency.
+The build is a native x64 DLL without a C runtime dependency. `finalize_pe.py` adds the release version resource, normal Windows version declarations, and PE checksum.
 
 ## Repository
 
